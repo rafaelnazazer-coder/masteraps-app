@@ -1,0 +1,765 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistem Kasir & Pembayaran - CICIWDYA</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+        body {
+            background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+            color: #1f2937;
+            padding: 24px 16px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .app-container {
+            background: #ffffff;
+            width: 100%;
+            max-width: 500px;
+            border-radius: 20px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.05), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            overflow: hidden;
+            border: 1px solid rgba(229, 231, 235, 0.5);
+        }
+        .brand-header {
+            background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%);
+            color: #ffffff;
+            padding: 28px 24px;
+            text-align: center;
+            position: relative;
+        }
+        .brand-header h1 {
+            font-size: 26px;
+            font-weight: 800;
+            letter-spacing: 0.5px;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .brand-header p {
+            font-size: 13px;
+            color: #93c5fd;
+            margin-top: 6px;
+            font-weight: 500;
+        }
+        .content-body {
+            padding: 24px;
+        }
+        .section-title {
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: #6b7280;
+            margin-bottom: 10px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        /* 👤 GATE LOGIN / INPUT DATA */
+        .login-row {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 24px;
+        }
+        .input-field {
+            flex: 1;
+            padding: 12px 16px;
+            border: 1px solid #d1d5db;
+            border-radius: 12px;
+            font-size: 14px;
+            outline: none;
+            transition: all 0.2s ease;
+            background: #f9fafb;
+            color: #1f2937;
+        }
+        .input-field:focus {
+            border-color: #2563eb;
+            background: #ffffff;
+            box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
+        }
+        .btn-login {
+            padding: 0 24px;
+            background: #2563eb;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .btn-login:hover { 
+            background: #1d4ed8; 
+            transform: translateY(-1px);
+        }
+        /* 🖥️ MAIN AREA */
+        .main-cashier-content {
+            display: none;
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+        .main-cashier-content.show {
+            display: block;
+            opacity: 1;
+        }
+        /* ⭐ TAB FILTER BINTANG */
+        .star-tabs-container {
+            display: flex;
+            justify-content: space-between;
+            gap: 6px;
+            margin-bottom: 14px;
+            background: #f3f4f6;
+            padding: 4px;
+            border-radius: 14px;
+        }
+        .tab-star {
+            flex: 1;
+            padding: 10px 4px;
+            background: transparent;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 700;
+            color: #9ca3af;
+            text-align: center;
+            transition: all 0.2s ease;
+        }
+        .tab-star.active {
+            background: #ffffff;
+            color: #f59e0b;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        }
+        /* 📦 LIST PREMIUM ITEMS */
+        .item-display-container {
+            background: #ffffff;
+            border: 1px solid #e5e7eb;
+            border-radius: 14px;
+            padding: 6px;
+            margin-bottom: 24px;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);
+        }
+        .star-section-content {
+            display: none;
+        }
+        .star-section-content.active {
+            display: block;
+        }
+        .row-item-premium {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 14px 12px;
+            border-bottom: 1px solid #f3f4f6;
+            transition: background 0.2s ease;
+            border-radius: 10px;
+        }
+        .row-item-premium:hover {
+            background: #f9fafb;
+        }
+        .row-item-premium:last-child {
+            border-bottom: none;
+        }
+        .item-info {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        .item-folder-name {
+            font-size: 14px;
+            font-weight: 600;
+            color: #111827;
+        }
+        .item-price-tag {
+            font-size: 13px;
+            color: #2563eb;
+            font-weight: 600;
+        }
+        .special-price {
+            color: #d97706;
+            font-weight: 600;
+            font-style: italic;
+        }
+        .btn-pilih-item {
+            padding: 8px 16px;
+            background: #ffffff;
+            color: #4b5563;
+            border: 1px solid #d1d5db;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .btn-pilih-item:hover {
+            background: #f3f4f6;
+            border-color: #9ca3af;
+        }
+        .btn-pilih-item.active {
+            background: #2563eb;
+            color: #ffffff;
+            border-color: #2563eb;
+            box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.2);
+        }
+        /* 💳 METODE PEMBAYARAN */
+        .payment-methods {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+        .method-card {
+            border: 2px solid #e5e7eb;
+            border-radius: 14px;
+            padding: 14px;
+            cursor: pointer;
+            position: relative;
+            transition: all 0.2s ease;
+            background: #ffffff;
+        }
+        .method-card input {
+            position: absolute;
+            top: 14px;
+            right: 14px;
+            accent-color: #2563eb;
+        }
+        .method-card.selected {
+            border-color: #2563eb;
+            background-color: #f0f6ff;
+        }
+        .method-title {
+            font-size: 14px;
+            font-weight: 700;
+            margin-bottom: 4px;
+            color: #1f2937;
+        }
+        .method-desc {
+            font-size: 11px;
+            color: #6b7280;
+        }
+        /* 🎟️ VOUCHER PROMO */
+        .promo-container {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 24px;
+        }
+        .btn-promo {
+            padding: 0 20px;
+            background: #4b5563;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .btn-promo:hover { background: #374151; }
+
+        /* 💰 TOTAL BOX RINGKASAN */
+        .total-box {
+            background: #fff1f2;
+            border: 1px solid #ffe4e6;
+            border-radius: 14px;
+            padding: 18px;
+            margin-bottom: 24px;
+        }
+        .total-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        .total-row:last-child {
+            margin-bottom: 0;
+            border-top: 1px dashed #fecdd3;
+            padding-top: 12px;
+            margin-top: 12px;
+        }
+        .total-label { font-size: 13px; color: #6b7280; font-weight: 500; }
+        .total-label.grand { font-size: 15px; font-weight: 700; color: #9f1239; }
+        .total-amount { font-size: 14px; font-weight: 600; color: #374151; }
+        .total-amount.grand { font-size: 22px; font-weight: 800; color: #9f1239; }
+        
+        /* 🚀 TOMBOL AKSI UTAMA */
+        .action-buttons {
+            display: flex;
+            gap: 12px;
+        }
+        .btn-submit {
+            flex: 3;
+            background: #2563eb;
+            color: white;
+            border: none;
+            padding: 16px;
+            border-radius: 14px;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(37, 99, 235, 0.2);
+            transition: all 0.2s;
+        }
+        .btn-submit:hover:not(:disabled) { 
+            background: #1d4ed8; 
+            transform: translateY(-1px);
+            box-shadow: 0 6px 14px rgba(37, 99, 235, 0.25);
+        }
+        .btn-submit:disabled { background: #9ca3af; cursor: not-allowed; box-shadow: none; transform: none; }
+        
+        .btn-reset {
+            flex: 1;
+            background: #fee2e2;
+            color: #ef4444;
+            border: 1px solid #fca5a5;
+            padding: 16px;
+            border-radius: 14px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-reset:hover { background: #ffeeee; border-color: #ef4444; }
+
+        /* 🔔 NOTIFIKASI TOAST */
+        .status-message {
+            margin-top: 14px;
+            padding: 14px;
+            border-radius: 12px;
+            font-size: 13px;
+            text-align: center;
+            font-weight: 500;
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+        .status-success { background: #d1fae5; color: #065f46; border: 1px solid #a7f3d0; display: block; }
+        .status-error { background: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; display: block; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(4px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+
+<div class="app-container">
+    <div class="brand-header">
+        <h1>CICIWDYA.aset</h1>
+        <p>⚠️ Peringatan: bukan untuk tontonan publik.</p>
+    </div>
+
+    <div class="content-body">
+        
+        <!-- Bagian Input Data Pelanggan -->
+        <div class="section-title">👤 Data Pelanggan</div>
+        <div class="login-row">
+            <input type="text" id="namaPembeli" class="input-field" placeholder="Masukkan username Telegram...">
+            <button class="btn-login" id="loginBtn" onclick="cekLogin()">Open</button>
+        </div>
+
+        <!-- AREA KASIR UTAMA -->
+        <div id="cashierArea" class="main-cashier-content">
+            
+            <div class="section-title">✨ Pilih Tingkatan Item VIP</div>
+            
+            <!-- Tombol Tab Bintang Horizontal -->
+            <div class="star-tabs-container">
+                <button class="tab-star active" onclick="switchStarTab(2)">⭐⭐</button>
+                <button class="tab-star" onclick="switchStarTab(3)">⭐⭐⭐</button>
+                <button class="tab-star" onclick="switchStarTab(4)">⭐⭐⭐⭐</button>
+                <button class="tab-star" onclick="switchStarTab(5)">⭐⭐⭐⭐⭐</button>
+            </div>
+
+            <!-- Wadah Tampilan Konten Item Folder -->
+            <div class="item-display-container">
+                
+                <!-- KATEGORI BINTANG 2 -->
+                <div id="star-content-2" class="star-section-content active">
+                    <div class="row-item-premium">
+                        <div class="item-info">
+                            <span class="item-folder-name">Chatan Rasa Temen Dekat</span>
+                            <span class="item-price-tag">Rp 10.000</span>
+                        </div>
+                        <button class="btn-pilih-item" id="btn-chat_10k" onclick="togglePilihItem(this, 'chat_10k', 10000, 'Chatan Rasa Temen Dekat')">Pilih</button>
+                    </div>
+                    <div class="row-item-premium">
+                        <div class="item-info">
+                            <span class="item-folder-name">Chatan Rasa Pacar</span>
+                            <span class="item-price-tag">Rp 20.000</span>
+                        </div>
+                        <button class="btn-pilih-item" id="btn-chat_20k" onclick="togglePilihItem(this, 'chat_20k', 20000, 'Chatan Rasa Pacar')">Pilih</button>
+                    </div>
+                    <div class="row-item-premium">
+                        <div class="item-info">
+                            <span class="item-folder-name">VIP Chat 18+</span>
+                            <span class="item-price-tag">Rp 30.000</span>
+                        </div>
+                        <button class="btn-pilih-item" id="btn-chat_30k" onclick="togglePilihItem(this, 'chat_30k', 30000, 'VIP Chat 18+')">Pilih</button>
+                    </div>
+                </div>
+
+                <!-- KATEGORI BINTANG 3 -->
+                <div id="star-content-3" class="star-section-content">
+                    <div class="row-item-premium">
+                        <div class="item-info">
+                            <span class="item-folder-name">PAP Kesayangan</span>
+                            <span class="item-price-tag">Rp 25.000</span>
+                        </div>
+                        <button class="btn-pilih-item" id="btn-foto_25k" onclick="togglePilihItem(this, 'foto_25k', 25000, 'PAP Kesayangan')">Pilih</button>
+                    </div>
+                    <div class="row-item-premium">
+                        <div class="item-info">
+                            <span class="item-folder-name">Foto Favorit</span>
+                            <span class="item-price-tag">Rp 35.000</span>
+                        </div>
+                        <button class="btn-pilih-item" id="btn-foto_35k" onclick="togglePilihItem(this, 'foto_35k', 35000, 'Foto Favorit')">Pilih</button>
+                    </div>
+                    <div class="row-item-premium">
+                        <div class="item-info">
+                            <span class="item-folder-name">VIP Foto (Premium)</span>
+                            <span class="item-price-tag">Rp 40.000</span>
+                        </div>
+                        <button class="btn-pilih-item" id="btn-foto_40k" onclick="togglePilihItem(this, 'foto_40k', 40000, 'VIP Foto (Premium)')">Pilih</button>
+                    </div>
+                </div>
+
+                <!-- KATEGORI BINTANG 4 -->
+                <div id="star-content-4" class="star-section-content">
+                    <div class="row-item-premium">
+                        <div class="item-info">
+                            <span class="item-folder-name">VIP VIDEO 1 Week (Reguler)</span>
+                            <span class="item-price-tag">Rp 50.000</span>
+                        </div>
+                        <button class="btn-pilih-item" id="btn-video_50k" onclick="togglePilihItem(this, 'video_50k', 50000, 'VIP VIDEO 1 Week (Reguler)')">Pilih</button>
+                    </div>
+                    <div class="row-item-premium">
+                        <div class="item-info">
+                            <span class="item-folder-name">VIP VIDEO 1 Month (High Quality)</span>
+                            <span class="item-price-tag">Rp 70.000</span>
+                        </div>
+                        <button class="btn-pilih-item" id="btn-video_70k" onclick="togglePilihItem(this, 'video_70k', 70000, 'VIP VIDEO 1 Month (High Quality)')">Pilih</button>
+                    </div>
+                </div>
+
+                <!-- KATEGORI BINTANG 5 -->
+                <div id="star-content-5" class="star-section-content">
+                    <div class="row-item-premium">
+                        <div class="item-info">
+                            <span class="item-folder-name">Short Time 💎</span>
+                            <span class="item-price-tag special-price">Silahkan hubungi admin</span>
+                        </div>
+                        <button class="btn-pilih-item" id="btn-video_350k" onclick="togglePilihItem(this, 'video_350k', 350000, 'Short Time 💎')">Pilih</button>
+                    </div>
+                    <div class="row-item-premium">
+                        <div class="item-info">
+                            <span class="item-folder-name">One Night 👑</span>
+                            <span class="item-price-tag special-price">Silahkan hubungi admin</span>
+                        </div>
+                        <button class="btn-pilih-item" id="btn-video_150k" onclick="togglePilihItem(this, 'video_150k', 150000, 'One Night 👑')">Pilih</button>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Metode Pembayaran -->
+            <div class="section-title">💳 Metode Pembayaran</div>
+            <div class="payment-methods">
+                <div class="method-card selected" id="card-qris" onclick="selectMethod('QRIS')">
+                    <input type="radio" name="pay_method" value="QRIS" checked id="radio-qris">
+                    <span class="method-title">QRIS</span>
+                    <span class="method-desc">E-Wallet Digital</span>
+                </div>
+                <div class="method-card" id="card-tf" onclick="selectMethod('Transfer Bank')">
+                    <input type="radio" name="pay_method" value="Transfer Bank" id="radio-tf">
+                    <span class="method-title">Transfer</span>
+                    <span class="method-desc">SeaBank Manual</span>
+                </div>
+            </div>
+
+            <!-- Kode Voucher Promo -->
+            <div class="section-title">🎟️ Kode Voucher Promo</div>
+            <div class="promo-container">
+                <input type="text" id="kodePromo" class="input-field" placeholder="Contoh: CICIWDYA" style="text-transform: uppercase;">
+                <button class="btn-promo" onclick="klaimPromo()">Klaim</button>
+            </div>
+
+            <!-- Total Pembayaran -->
+            <div class="total-box">
+                <div class="total-row">
+                    <span class="total-label">Subtotal:</span>
+                    <span class="total-amount" id="subtotalDisplay">Rp 0</span>
+                </div>
+                <div class="total-row">
+                    <span class="total-label">Potongan Diskon:</span>
+                    <span class="total-amount" id="diskonDisplay" style="color: #10b981;">- Rp 0</span>
+                </div>
+                <div class="total-row">
+                    <span class="total-label grand">Total Akhir:</span>
+                    <span class="total-amount grand" id="totalDisplay">Rp 0</span>
+                </div>
+            </div>
+
+            <!-- Tombol Aksi -->
+            <div class="action-buttons">
+                <button class="btn-submit" id="submitBtn" onclick="kirimKeTelegram()">Kirim Nota ke Telegram</button>
+                <button class="btn-reset" title="Reset Keranjang" onclick="resetForm()">Reset</button>
+            </div>
+            
+            <div id="statusToast" class="status-message"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+const BOT_TOKEN = "8278084030:AAGdcVXSFZyFkLV_WpNPTiU1LFRMyZ_QvrY";
+const CHAT_ID = "8839326720";
+
+let itemTerpilih = {};
+let selectedPayment = "QRIS";
+let subtotalHarga = 0;
+let nominalDiskon = 0;
+let totalHargaGlobal = 0;
+let isLoggedIn = false;
+
+const daftarVoucher = {
+    "VIPMANTAP": 10000,
+    "CICIWDYA": 15000
+};
+
+function cekLogin() {
+    const namaInput = document.getElementById('namaPembeli').value.trim();
+    const cashierArea = document.getElementById('cashierArea');
+    const loginBtn = document.getElementById('loginBtn');
+    const namaField = document.getElementById('namaPembeli');
+
+    if (namaInput === "") {
+        alert("⚠️ AKSES DITOLAK! Silakan masukkan username Telegram kamu sebelum masuk.");
+        return;
+    }
+
+    if (!isLoggedIn) {
+        isLoggedIn = true;
+        cashierArea.classList.add('show');
+        namaField.disabled = true;
+        loginBtn.innerText = "Keluar";
+        loginBtn.style.background = "#ef4444";
+    } else {
+        if (confirm("Apakah Anda ingin keluar? Seluruh data pilihan belanjaan saat ini akan dihapus.")) {
+            isLoggedIn = false;
+            cashierArea.classList.remove('show');
+            namaField.disabled = false;
+            namaField.value = "";
+            loginBtn.innerText = "Open";
+            loginBtn.style.background = "#2563eb";
+            forceResetData();
+        }
+    }
+}
+
+function switchStarTab(starNumber) {
+    const tabs = document.querySelectorAll('.tab-star');
+    
+    // Perbaikan pembersihan status class active yang presisi pada tab tombol bintang
+    tabs.forEach((tab, index) => {
+        if ((starNumber === 2 && index === 0) || 
+            (starNumber === 3 && index === 1) || 
+            (starNumber === 4 && index === 2) || 
+            (starNumber === 5 && index === 3)) {
+            tab.classList.add('active');
+        } else {
+            tab.classList.remove('active');
+        }
+    });
+
+    // Tampilkan konten folder sesuai bintang yang dipilih
+    const contents = document.querySelectorAll('.star-section-content');
+    contents.forEach(content => {
+        content.classList.remove('active');
+    });
+    document.getElementById(`star-content-${starNumber}`).classList.add('active');
+}
+
+function togglePilihItem(buttonElement, idItem, hargaItem, namaItem) {
+    if (buttonElement.classList.contains('active')) {
+        buttonElement.classList.remove('active');
+        buttonElement.innerText = "Pilih";
+        delete itemTerpilih[idItem];
+    } else {
+        buttonElement.classList.add('active');
+        buttonElement.innerText = "Dipilih";
+        itemTerpilih[idItem] = { nama: namaItem, harga: hargaItem };
+    }
+    hitungTotal();
+}
+
+function selectMethod(method) {
+    selectedPayment = method;
+    document.getElementById('radio-qris').checked = (method === 'QRIS');
+    document.getElementById('radio-tf').checked = (method === 'Transfer Bank');
+    
+    document.getElementById('card-qris').classList.toggle('selected', method === 'QRIS');
+    document.getElementById('card-tf').classList.toggle('selected', method === 'Transfer Bank');
+}
+
+function klaimPromo() {
+    const inputKode = document.getElementById('kodePromo').value.trim().toUpperCase();
+    
+    if (subtotalHarga === 0) {
+        alert("Pilih item belanjaan terlebih dahulu sebelum memasukkan kode promo!");
+        return;
+    }
+
+    if (inputKode in daftarVoucher) {
+        nominalDiskon = daftarVoucher[inputKode];
+        alert(`🎉 Selamat! Voucher berhasil digunakan. Potongan Rp ${nominalDiskon.toLocaleString('id-ID')}`);
+    } else if (inputKode === "") {
+        nominalDiskon = 0;
+    } else {
+        alert("❌ Kode promo tidak valid atau kedaluwarsa.");
+        nominalDiskon = 0;
+        document.getElementById('kodePromo').value = "";
+    }
+    hitungTotal();
+}
+
+function hitungTotal() {
+    subtotalHarga = 0;
+    for (let key in itemTerpilih) {
+        subtotalHarga += itemTerpilih[key].harga;
+    }
+    
+    if (subtotalHarga === 0) nominalDiskon = 0;
+
+    totalHargaGlobal = subtotalHarga - nominalDiskon;
+    if (totalHargaGlobal < 0) totalHargaGlobal = 0;
+
+    document.getElementById('subtotalDisplay').innerText = "Rp " + subtotalHarga.toLocaleString('id-ID');
+    document.getElementById('diskonDisplay').innerText = "- Rp " + nominalDiskon.toLocaleString('id-ID');
+    document.getElementById('totalDisplay').innerText = "Rp " + totalHargaGlobal.toLocaleString('id-ID');
+}
+
+function forceResetData() {
+    itemTerpilih = {};
+    const semuaTombol = document.querySelectorAll('.btn-pilih-item');
+    semuaTombol.forEach(btn => {
+        btn.classList.remove('active');
+        btn.innerText = "Pilih";
+    });
+    document.getElementById('kodePromo').value = "";
+    nominalDiskon = 0;
+    hitungTotal();
+    document.getElementById('statusToast').style.display = "none";
+    switchStarTab(2); 
+}
+
+function resetForm() {
+    if(confirm("Apakah Anda yakin ingin mengosongkan seluruh isi kasir?")) {
+        forceResetData();
+    }
+}
+
+function kirimKeTelegram() {
+    const toast = document.getElementById('statusToast');
+    const submitBtn = document.getElementById('submitBtn');
+    const namaUser = document.getElementById('namaPembeli').value.trim();
+
+    if (totalHargaGlobal === 0) {
+        toast.className = "status-message status-error";
+        toast.innerText = "⚠️ Silakan pilih minimal 1 item terlebih dahulu!";
+        return;
+    }
+
+    submitBtn.disabled = true;
+    submitBtn.innerText = "Proses Mengirim Nota...";
+    toast.className = "status-message";
+    toast.style.display = "block";
+    toast.innerText = "Sedang memproses enkripsi nota...";
+
+    const now = new Date();
+    const invoiceNo = "INV-" + now.getFullYear() + String(now.getMonth() + 1).padStart(2, '0') + String(now.getDate()).padStart(2, '0') + "-" + String(now.getHours()).padStart(2, '0') + String(now.getMinutes()).padStart(2, '0');
+    const kodeSimpel = "VIP-" + String(now.getHours()).padStart(2, '0') + String(now.getMinutes()).padStart(2, '0');
+
+    let rincianItem = "";
+    for (let key in itemTerpilih) {
+        rincianItem += `• ${itemTerpilih[key].nama} : Rp ${itemTerpilih[key].harga.toLocaleString('id-ID')}\n`;
+    }
+
+    let teksInstruksi = "";
+    if (selectedPayment === "Transfer Bank") {
+        teksInstruksi = `\n\n🏦 *INSTRUKSI PEMBAYARAN:*\n` +
+                        `Silakan lakukan transfer ke rekening berikut:\n` +
+                        `• *Bank:* SeaBank\n` +
+                        `• *No. Rekening:* \`901563860396\`\n` +
+                        `• *Atas Nama:* Admin Premium\n\n` +
+                        `📸 *Mohon kirimkan foto bukti transfer setelah chat ini.*`;
+    } else if (selectedPayment === "QRIS") {
+        teksInstruksi = `\n\n📸 *INSTRUKSI PEMBAYARAN:*\n` +
+                        `Silakan scan kode *QRIS* resmi toko kami yang tertera di layar kasir.\n\n` +
+                        `👍 *Mohon kirimkan bukti pembayaran jika sudah berhasil.*`;
+    }
+
+    let rincianVoucher = nominalDiskon > 0 ? `🎟️ *Potongan Diskon* : -Rp ${nominalDiskon.toLocaleString('id-ID')}\n` : "";
+
+    const pesanTelegram = `🔔 *Screenshot Ticket Kamu* 🔔\n\n` +
+                          `👤 *Username*         : *${namaUser}*\n` +
+                          `🔑 *COPY KEYWORD KEYS :* \`${kodeSimpel}\`\n` +
+                          `----------------------------------\n` +
+                          `🧾 No Invoice      : \`${invoiceNo}\`\n` +
+                          `📅 Tanggal         : ${now.toLocaleDateString('id-ID')} ${now.toLocaleTimeString('id-ID')}\n` +
+                          `Metode Pembayaran  : *${selectedPayment}*\n` +
+                          `----------------------------------\n` +
+                          `*Rincian Pesanan:*\n${rincianItem}` +
+                          `----------------------------------\n` +
+                          `${rincianVoucher}` +
+                          `💰 *TOTAL AKHIR : Rp ${totalHargaGlobal.toLocaleString('id-ID')}*\n` +
+                          `----------------------------------${teksInstruksi}\n\n` +
+                          `📢 *Catatan Pembeli: Simpan/sebutkan kata kunci \`${kodeSimpel}\` ke Admin saat konfirmasi.*`;
+
+    const url = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`;
+
+    fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            chat_id: CHAT_ID,
+            text: pesanTelegram,
+            parse_mode: 'Markdown'
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.ok) {
+            toast.className = "status-message status-success";
+            toast.innerText = "✅ Nota Berhasil dikirim ke Telegram!";
+            
+            isLoggedIn = false;
+            document.getElementById('cashierArea').classList.remove('show');
+            document.getElementById('namaPembeli').disabled = false;
+            document.getElementById('namaPembeli').value = "";
+            document.getElementById('loginBtn').innerText = "Open";
+            document.getElementById('loginBtn').style.background = "#2563eb";
+            forceResetData();
+        } else {
+            toast.className = "status-message status-error";
+            toast.innerText = "❌ Gagal: " + data.description;
+        }
+    })
+    .catch(error => {
+        toast.className = "status-message status-error";
+        toast.innerText = "❌ Terjadi kesalahan jaringan.";
+    })
+    .finally(() => {
+        submitBtn.disabled = false;
+        submitBtn.innerText = "Kirim Nota ke Telegram";
+    });
+}
+</script>
+</body>
+</html>

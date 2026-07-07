@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    <script src="[https://telegram.org/js/telegram-web-app.js](https://telegram.org/js/telegram-web-app.js)"></script>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sistem Kasir & Pembayaran - CICIWDYA</title>
@@ -585,6 +585,7 @@ function cekLogin() {
         if (cashierArea) cashierArea.classList.add('show');
     }
 }
+
 function switchStarTab(starNumber) {
     const tabs = document.querySelectorAll('.tab-star');
     if (!tabs || tabs.length === 0) return; // Pengaman jika elemen belum termuat sempurna
@@ -611,13 +612,6 @@ function switchStarTab(starNumber) {
     if (targetContent) {
         targetContent.classList.add('active');
     }
-}
-    // Tampilkan konten folder sesuai bintang yang dipilih
-    const contents = document.querySelectorAll('.star-section-content');
-    contents.forEach(content => {
-        content.classList.remove('active');
-    });
-    document.getElementById(`star-content-${starNumber}`).classList.add('active');
 }
 
 function togglePilihItem(buttonElement, idItem, hargaItem, namaItem) {

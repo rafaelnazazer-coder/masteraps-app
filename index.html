@@ -570,8 +570,9 @@ function cekLogin() {
 
 function switchStarTab(starNumber) {
     const tabs = document.querySelectorAll('.tab-star');
-    
-    // Perbaikan pembersihan status class active yang presisi pada tab tombol bintang
+    if (!tabs || tabs.length === 0) return; // Pengaman jika elemen belum termuat sempurna
+
+    // Mengatur class active pada tombol tab bintang
     tabs.forEach((tab, index) => {
         if ((starNumber === 2 && index === 0) || 
             (starNumber === 3 && index === 1) || 
@@ -583,6 +584,17 @@ function switchStarTab(starNumber) {
         }
     });
 
+    // Tampilkan konten folder sesuai bintang yang dipilih
+    const contents = document.querySelectorAll('.star-section-content');
+    contents.forEach(content => {
+        content.classList.remove('active');
+    });
+    
+    const targetContent = document.getElementById(`star-content-${starNumber}`);
+    if (targetContent) {
+        targetContent.classList.add('active');
+    }
+}
     // Tampilkan konten folder sesuai bintang yang dipilih
     const contents = document.querySelectorAll('.star-section-content');
     contents.forEach(content => {

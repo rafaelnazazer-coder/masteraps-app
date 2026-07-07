@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sistem Kasir & Pembayaran - CICIWDYA</title>
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         * {
             box-sizing: border-box;
@@ -487,7 +486,7 @@
             <!-- Kode Voucher Promo -->
             <div class="section-title">🎟️ Kode Voucher Promo</div>
             <div class="promo-container">
-                <input type="text" id="kodePromo" class="input-field" placeholder="CLAIM KODE" style="text-transform: uppercase;">
+                <input type="text" id="kodePromo" class="input-field" placeholder="CLAIM CODE" style="text-transform: uppercase;">
                 <button class="btn-promo" onclick="klaimPromo()">Klaim</button>
             </div>
 
@@ -519,13 +518,8 @@
 </div>
 
 <script>
-// Inisialisasi SDK Telegram
-const tg = window.Telegram.WebApp;
-tg.ready();
-
 const BOT_TOKEN = "8278084030:AAGdcVXSFZyFkLV_WpNPTiU1LFRMyZ_QvrY";
-const ADMIN_CHAT_ID = "8839326720"; 
-const USER_CHAT_ID = tg.initDataUnsafe?.user?.id || ADMIN_CHAT_ID;
+const CHAT_ID = "8839326720";
 
 let itemTerpilih = {};
 let selectedPayment = "QRIS";
@@ -533,7 +527,7 @@ let subtotalHarga = 0;
 let nominalDiskon = 0;
 let totalHargaGlobal = 0;
 let isLoggedIn = false;
-    
+
 const daftarVoucher = {
     "VIPMANTAP": 10000,
     "CICIWDYA": 15000
@@ -713,7 +707,7 @@ function kirimKeTelegram() {
 
     let rincianVoucher = nominalDiskon > 0 ? `🎟️ *Potongan Diskon* : -Rp ${nominalDiskon.toLocaleString('id-ID')}\n` : "";
 
-    const pesanTelegram = `🔔 *Screenshot Ticket Kamu* 🔔\n\n` +
+    const pesanTelegram = `🔔 *Ticket Kamu* 🔔\n\n` +
                           `👤 *Username*         : *${namaUser}*\n` +
                           `🔑 *COPY KEYWORD KEYS :* \`${kodeSimpel}\`\n` +
                           `----------------------------------\n` +
@@ -730,42 +724,32 @@ function kirimKeTelegram() {
 
     const url = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`;
 
-    // Fungsi pembantu kirim pesan telegram
-    const kirimPesan = (targetChatId) => {
-        return fetch(url, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                chat_id: targetChatId,
-                text: pesanTelegram,
-                parse_mode: 'Markdown'
-            })
-        });
-    };
-
-    // Eksekusi kirim ke pembeli
-    kirimPesan(USER_CHAT_ID)
-    .then(() => {
-        // Jika pembeli bukan kamu, kirim juga laporan salinannya ke kamu (Admin)
-        if (String(USER_CHAT_ID) !== String(ADMIN_CHAT_ID)) {
-            kirimPesan(ADMIN_CHAT_ID);
+    fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            chat_id: CHAT_ID,
+            text: pesanTelegram,
+            parse_mode: 'Markdown'
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.ok) {
+            toast.className = "status-message status-success";
+            toast.innerText = "✅ Nota Berhasil dikirim ke Telegram!";
+            
+            isLoggedIn = false;
+            document.getElementById('cashierArea').classList.remove('show');
+            document.getElementById('namaPembeli').disabled = false;
+            document.getElementById('namaPembeli').value = "";
+            document.getElementById('loginBtn').innerText = "Open";
+            document.getElementById('loginBtn').style.background = "#2563eb";
+            forceResetData();
+        } else {
+            toast.className = "status-message status-error";
+            toast.innerText = "❌ Gagal: " + data.description;
         }
-
-        toast.className = "status-message status-success";
-        toast.innerText = "✅ Nota Berhasil dikirim ke Telegram Anda!";
-
-        isLoggedIn = false;
-        document.getElementById('cashierArea').classList.remove('show');
-        document.getElementById('namaPembeli').disabled = false;
-        document.getElementById('namaPembeli').value = "";
-        document.getElementById('loginBtn').innerText = "Open";
-        document.getElementById('loginBtn').style.background = "#2563eb";
-        forceResetData();
-
-        // Beri jeda 2 detik lalu tutup Mini App otomatis
-        setTimeout(() => {
-            if (tg.close) tg.close();
-        }, 2000);
     })
     .catch(error => {
         toast.className = "status-message status-error";

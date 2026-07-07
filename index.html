@@ -539,35 +539,52 @@ const daftarVoucher = {
 };
 
 function cekLogin() {
-    const namaInput = document.getElementById('namaPembeli').value.trim();
-    const cashierArea = document.getElementById('cashierArea');
-    const loginBtn = document.getElementById('loginBtn');
-    const namaField = document.getElementById('namaPembeli');
-
-    if (namaInput === "") {
-        alert("⚠️ AKSES DITOLAK! Silakan masukkan username Telegram kamu sebelum masuk.");
+    const namaInput = document.getElementById('namaPembeli');
+    const toast = document.getElementById('statusToast');
+    
+    // Pastikan input nama pembeli ada dan tidak kosong
+    if (!namaInput || namaInput.value.trim() === "") {
+        if (toast) {
+            toast.className = "status-message status-error";
+            toast.innerText = "⚠️ Silakan masukkan data pelanggan terlebih dahulu!";
+            toast.style.display = "block";
+        }
         return;
     }
 
-    if (!isLoggedIn) {
+    try {
+        // 1. Ubah status login ke true
         isLoggedIn = true;
-        cashierArea.classList.add('show');
-        namaField.disabled = true;
-        loginBtn.innerText = "Keluar";
-        loginBtn.style.background = "#ef4444";
-    } else {
-        if (confirm("Apakah Anda ingin keluar? Seluruh data pilihan belanjaan saat ini akan dihapus.")) {
-            isLoggedIn = false;
-            cashierArea.classList.remove('show');
-            namaField.disabled = false;
-            namaField.value = "";
-            loginBtn.innerText = "Open";
-            loginBtn.style.background = "#2563eb";
-            forceResetData();
+
+        // 2. Tampilkan area kasir di dalam aplikasi
+        const cashierArea = document.getElementById('cashierArea');
+        if (cashierArea) {
+            cashierArea.classList.add('show');
         }
+
+        // 3. Kunci input nama dan ubah gaya tombol Open menjadi aktif
+        namaInput.disabled = true;
+        const loginBtn = document.getElementById('loginBtn');
+        if (loginBtn) {
+            loginBtn.innerText = "Active";
+            loginBtn.style.background = "#10b981"; // Mengubah warna ke hijau sukses
+        }
+
+        // 4. Jalankan fungsi reset data bawaan kodinganmu dengan aman
+        if (typeof forceResetData === "function") {
+            forceResetData();
+        } else {
+            // Jika forceResetData bermasalah, langsung panggil tab bintang secara manual agar tidak crash
+            switchStarTab(2);
+        }
+
+    } catch (error) {
+        console.error("Gagal membuka halaman kasir:", error);
+        // Fallback darurat: pastikan halaman tetap terbuka meskipun ada error kecil di background
+        const cashierArea = document.getElementById('cashierArea');
+        if (cashierArea) cashierArea.classList.add('show');
     }
 }
-
 function switchStarTab(starNumber) {
     const tabs = document.querySelectorAll('.tab-star');
     if (!tabs || tabs.length === 0) return; // Pengaman jika elemen belum termuat sempurna
